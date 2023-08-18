@@ -1,0 +1,56 @@
+﻿<Window x:Class="Store.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Store"
+        mc:Ignorable="d"
+        Loaded="Window_Loaded" Closed="Window_Closed"
+        Title="MainWindow" Height="220" Width="600" WindowStartupLocation="CenterScreen" Background="SlateGray">
+
+    <Window.Resources>
+        <Style x:Key="base" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Tahoma"/>
+        </Style>
+        <Style x:Key="header" TargetType="TextBlock" BasedOn="{StaticResource base}">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="25"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,20,0,0"/>
+        </Style>
+        <Style x:Key="baseStyle" TargetType="TextBlock" BasedOn="{StaticResource base}">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Margin" Value="10,25,10,10"/>
+        </Style>
+        <Style x:Key="btnStyle" TargetType="Button">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="25,23,25,3"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.ColumnSpan="3" Style="{StaticResource header}">Магазин</TextBlock>
+        
+        <TextBlock Grid.Row="1" Style="{StaticResource baseStyle}">Общее кол-во товара:</TextBlock>
+        <TextBlock x:Name="textAllCount" Grid.Row="1" Grid.Column="1" Style="{StaticResource baseStyle}">0</TextBlock>
+
+        <TextBlock Grid.Row="2" Style="{StaticResource baseStyle}">Кол-во разных напитков:</TextBlock>
+        <TextBlock x:Name="textDrinkCount" Grid.Row="2" Grid.Column="1" Style="{StaticResource baseStyle}">0</TextBlock>
+
+        <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAllAmount_Click">Узнать</Button>
+        <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAmountDrink_Click">Узнать</Button>
+    </Grid>
+    
+</Window>
