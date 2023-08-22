@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Store"
         mc:Ignorable="d"
-        Loaded="Window_Loaded" Closed="Window_Closed"
-        Title="MainWindow" Height="220" Width="600" WindowStartupLocation="CenterScreen" Background="SlateGray">
+        Loaded="Window_Loaded" Closed="Window_Closed" MinWidth="400" MinHeight="275"
+        Title="Store v1.1" Height="300" Width="550" WindowStartupLocation="CenterScreen" Background="SlateGray">
 
     <Window.Resources>
         <Style x:Key="base" TargetType="TextBlock">
@@ -21,11 +21,30 @@
         </Style>
         <Style x:Key="baseStyle" TargetType="TextBlock" BasedOn="{StaticResource base}">
             <Setter Property="FontSize" Value="18"/>
-            <Setter Property="Margin" Value="10,25,10,10"/>
+            <Setter Property="Margin" Value="10,20,10,10"/>
         </Style>
         <Style x:Key="btnStyle" TargetType="Button">
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="LightGray"/>
             <Setter Property="Margin" Value="25,23,25,3"/>
+        </Style>
+
+        <Style x:Key="listViewStyle" TargetType="{x:Type ListView}">
+            <Setter Property="Background" Value="DarkGray"/>
+            <Setter Property="Margin" Value="1,15,1,1"/>
+        </Style>
+        <Style x:Key="listViewItem" TargetType="{x:Type ListViewItem}">
+            <Setter Property="Background" Value="CadetBlue"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="SlateGray"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Name="headerListView" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Background" Value="LightSlateGray"/>
+            <Setter Property="BorderBrush" Value="LightSlateGray"/>
+            <Setter Property="Foreground" Value="White"/>
         </Style>
     </Window.Resources>
     
@@ -39,18 +58,31 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="3" Style="{StaticResource header}">Магазин</TextBlock>
+        <TextBlock Grid.ColumnSpan="3" Style="{StaticResource header}">Store</TextBlock>
         
-        <TextBlock Grid.Row="1" Style="{StaticResource baseStyle}">Общее кол-во товара:</TextBlock>
+        <TextBlock Grid.Row="1" Style="{StaticResource baseStyle}">Total amount products:</TextBlock>
         <TextBlock x:Name="textAllCount" Grid.Row="1" Grid.Column="1" Style="{StaticResource baseStyle}">0</TextBlock>
 
-        <TextBlock Grid.Row="2" Style="{StaticResource baseStyle}">Кол-во разных напитков:</TextBlock>
+        <TextBlock Grid.Row="2" Style="{StaticResource baseStyle}">Total amount drinks:</TextBlock>
         <TextBlock x:Name="textDrinkCount" Grid.Row="2" Grid.Column="1" Style="{StaticResource baseStyle}">0</TextBlock>
 
-        <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAllAmount_Click">Узнать</Button>
-        <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAmountDrink_Click">Узнать</Button>
+        <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAllAmount_Click">Find</Button>
+        <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAmountDrink_Click">Find</Button>
+
+        <ListView x:Name="listView" Grid.Row="3" Grid.ColumnSpan="3" ItemsSource="{Binding products}"
+                  Style="{StaticResource listViewStyle}" ItemContainerStyle="{StaticResource listViewItem}">
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Header="Title" Width="150" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Price" Width="90" DisplayMemberBinding="{Binding Price}"/>
+                    <GridViewColumn Header="Amount" Width="90" DisplayMemberBinding="{Binding Quantity}"/>
+                    <GridViewColumn Header="Category" Width="150" DisplayMemberBinding="{Binding Category}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
     
 </Window>

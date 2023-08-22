@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.Windows;
 using Microsoft.Data.SqlClient;
 
@@ -7,11 +9,13 @@ namespace Store
     public partial class MainWindow : Window
     {
         private SqlConnection connection;
+        public ObservableCollection<Product> products { get; set; } = new();  // коллекция продуктов
 
         public MainWindow()
         {
             InitializeComponent();
             connection = null!;
+            DataContext = this;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -19,14 +23,13 @@ namespace Store
             try
             {
                 connection = new SqlConnection(App.ConnectionString);
-                connection.Open();
+                connection.Open();  // подключаемся к БД
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
                 Close();
             }
-
             CreateTables();  // создаём таблицы
         }
 
@@ -38,13 +41,11 @@ namespace Store
 
         private void CreateTables()
         {
-            using SqlCommand command = new SqlCommand();
-            command.Connection = connection;
+            using SqlCommand command = new SqlCommand() { Connection = connection };
             command.CommandText = @"CREATE TABLE Category (
                                         id int primary key identity(1, 1),
                                     	name nvarchar(30) NOT NULL
                                     )
-
                                     CREATE TABLE Product (
                                         id int PRIMARY KEY IDENTITY(1, 1),
                                     	name nvarchar(50) NOT NULL,
@@ -54,24 +55,17 @@ namespace Store
                                     )";
             try
             {
-                command.ExecuteNonQuery();
+                command.ExecuteNonQuery();  // выполняем запрос
                 MessageBox.Show("Таблицы созданы!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 InsertDataInTables();  // заполняем таблицы данными
             }
-            catch (SqlException)
-            {
-                MessageBox.Show("Таблицы уже созданы!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (SqlException) { MessageBox.Show("Таблицы уже созданы!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void InsertDataInTables()
         {
-            using SqlCommand command = new SqlCommand();
-            command.Connection = connection;
+            using SqlCommand command = new SqlCommand() { Connection = connection };
             command.CommandText = @"INSERT INTO Category (name)
                                     VALUES ('Молочка'), ('Напитки'), ('Крупы')
 
@@ -86,43 +80,83 @@ namespace Store
                 command.ExecuteNonQuery();
                 MessageBox.Show("Данные успешно установлены!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch (Exception ex)
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+
+        private void GetAllProducts()
+        {
+            using SqlCommand command = new SqlCommand() { Connection = connection };
+            command.CommandText = @"SELECT p.name, p.price, p.quantity, c.name AS 'category'
+                                    FROM Product AS p
+                                    JOIN Category AS c ON c.id = p.id_category";  // запрос на все товары
+            try
             {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateCollectionProducts(command);  // обновляем коллекцию товаров
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+        private void GetDrinkProducts()
+        {
+            using SqlCommand command = new SqlCommand() { Connection = connection };
+            command.CommandText = @"SELECT p.name, p.price, p.quantity, 'Drinkables' AS 'category'
+                                    FROM Product AS p
+                                    WHERE id_category = (SELECT id
+                                                         FROM Category
+                                                         WHERE name LIKE 'Drinkables')";  // запрос на товары у которых категория - это 'Напитки'
+            try
+            {
+                UpdateCollectionProducts(command);  // обновляем коллекцию товаров
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+        private void UpdateCollectionProducts(SqlCommand command)
+        {
+            products.Clear();
+
+            using SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                // заполняем данными из БД коллекцию продуктов
+                products.Add(new Product
+                {
+                    Name = reader.GetString("Name"),
+                    Price = (float)reader.GetDouble("Price"),
+                    Quantity = reader.GetInt32("Quantity"),
+                    Category = reader.GetString("Category")
+                });
             }
         }
 
 
         private void BtnAllAmount_Click(object sender, RoutedEventArgs e)
         {
-            using SqlCommand command = new SqlCommand();
-            command.Connection = connection;
-            command.CommandText = "SELECT COUNT(*) FROM Product";
+            using SqlCommand command = new SqlCommand() { Connection = connection };
+            command.CommandText = "SELECT COUNT(*) FROM Product";  // кол-во всех товаров
             try
             {
-                textAllCount.Text = command.ExecuteScalar().ToString();
+                textAllCount.Text = command.ExecuteScalar().ToString();  // обновляем значение в интерфейсе
+                GetAllProducts();  // обновляем список товаров
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void BtnAmountDrink_Click(object sender, RoutedEventArgs e)
         {
-            using SqlCommand command = new SqlCommand();
-            command.Connection = connection;
+            using SqlCommand command = new SqlCommand() { Connection = connection };
             command.CommandText = @"SELECT COUNT(*)
                                     FROM Product
-                                    WHERE id_category = (SELECT TOP 1 id FROM Category WHERE name LIKE 'Напитки')";
+                                    WHERE id_category = (SELECT id
+					                                     FROM Category
+					                                     WHERE name LIKE 'Drinkables')";  // кол-во товаров, категория которых - это 'Напитки'
             try
             {
-                textDrinkCount.Text = command.ExecuteScalar().ToString();
+                textDrinkCount.Text = command.ExecuteScalar().ToString();  // обновляем значение в интерфейсе
+                GetDrinkProducts();  // обновляем список товаров
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
     }
 }
