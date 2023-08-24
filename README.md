@@ -1,3 +1,9 @@
+ - Third home work:
+
+![HW3](https://github.com/DaniilSob2004/ADO.NET_Practice/assets/106149184/fa7ddae4-8f44-4cbe-84bd-c3bd3403470a)
+![HW3_1](https://github.com/DaniilSob2004/ADO.NET_Practice/assets/106149184/2c7239cf-b2dd-4685-b7e5-d48072f20b37)
+![HW3_2](https://github.com/DaniilSob2004/ADO.NET_Practice/assets/106149184/2510fd06-38e2-41c8-9a2c-57d9dc294f50)
+
  - Second home work:
 
 ![HM2](https://github.com/DaniilSob2004/ADO.NET_Practice/assets/106149184/b0a03e9c-9132-4ebc-84bf-3ef7967d3bac)
