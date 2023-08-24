@@ -1,0 +1,78 @@
+﻿<Window x:Class="Store.Views.RegistrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Store.Views"
+        mc:Ignorable="d"
+        Unloaded="Window_Unloaded" MinWidth="350" MinHeight="325"
+        Title="Store v2.1" Height="350" Width="450" WindowStartupLocation="CenterScreen" Background="SlateGray">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="TextBlock" BasedOn="{StaticResource textStyle}">
+                <EventSetter Event="MouseLeftButtonDown" Handler="TextBlock_MouseLeftButtonDown"/>
+            </Style>
+
+            <Style TargetType="TextBox" BasedOn="{StaticResource textBoxStyle}">
+                <EventSetter Event="GotFocus" Handler="TextBox_GotFocus"/>
+                <EventSetter Event="LostFocus" Handler="TextBox_LostFocus"/>
+                <EventSetter Event="TextChanged" Handler="TextBox_TextChanged"/>
+            </Style>
+
+            <Style TargetType="PasswordBox" BasedOn="{StaticResource passwordBoxStyle}">
+                <EventSetter Event="GotFocus" Handler="TextBox_GotFocus"/>
+                <EventSetter Event="LostFocus" Handler="TextBox_LostFocus"/>
+                <EventSetter Event="PasswordChanged" Handler="PasswordBox_PasswordChanged"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="80"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition MaxHeight="80"/>
+            <RowDefinition MaxHeight="80"/>
+            <RowDefinition MaxHeight="80"/>
+            <RowDefinition MaxHeight="80"/>
+            <RowDefinition MaxHeight="80"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource headerTextStyle}">Store</TextBlock>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Foreground="LightGray">Log In</TextBlock>
+            <TextBlock>Sign Up</TextBlock>
+        </StackPanel>
+        <TextBox x:Name="userName" Grid.Row="2" Text="Username" Tag="Username"/>
+        <TextBox x:Name="login" Grid.Row="3" Text="Login" Tag="Login"/>
+
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <PasswordBox x:Name="password" Margin="40,8,10,8" Tag="Password" Password="Password"/>
+            <Button Grid.Column="1" Style="{StaticResource btnImageStyle}" Click="ShowPasswordBtn_Click">
+                <Image Width="24" Height="24" Source="/Images/password.png"/>
+            </Button>
+            <TextBox x:Name="textBoxShowPassword" Grid.Row="1" Margin="40,8,10,8" Visibility="Hidden" Text="{Binding ElementName=password, Path=Password}" Tag="Password"/>
+        </Grid>
+
+        <TextBox x:Name="email" Grid.Row="5" Text="Email" Tag="Email"/>
+        <Button Grid.Row="6" Content="SIGN UP" Style="{StaticResource btnBaseStyle}" Click="SignUpBtn_Click">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="18"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+
+    </Grid>
+    
+</Window>

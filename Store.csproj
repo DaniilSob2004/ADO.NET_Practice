@@ -8,7 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Views\exit.png" />
+    <None Remove="Views\password.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\exit.png" />
+    <Resource Include="Images\password.png" />
   </ItemGroup>
 
 </Project>

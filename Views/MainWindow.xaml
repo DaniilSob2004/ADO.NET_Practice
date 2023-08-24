@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Store"
         mc:Ignorable="d"
-        Loaded="Window_Loaded" Closed="Window_Closed" MinWidth="400" MinHeight="275"
-        Title="Store v1.1" Height="300" Width="550" WindowStartupLocation="CenterScreen" Background="SlateGray">
+        Closed="Window_Closed" MinWidth="400" MinHeight="275"
+        Title="Store v2.1" Height="300" Width="550" WindowStartupLocation="CenterScreen" Background="SlateGray">
 
     <Window.Resources>
         <Style x:Key="base" TargetType="TextBlock">
@@ -61,8 +61,20 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="3" Style="{StaticResource header}">Store</TextBlock>
-        
+        <Grid Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="1" Style="{StaticResource header}">Store</TextBlock>
+            <Button Grid.Column="2" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right"
+                    VerticalAlignment="Top" Margin="0,4,4,0" Click="BtnExit_Click">
+                <Image Width="20" Height="20" Source="/Images/exit.png"/>
+            </Button>
+        </Grid>
+
         <TextBlock Grid.Row="1" Style="{StaticResource baseStyle}">Total amount products:</TextBlock>
         <TextBlock x:Name="textAllCount" Grid.Row="1" Grid.Column="1" Style="{StaticResource baseStyle}">0</TextBlock>
 
@@ -72,7 +84,7 @@
         <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAllAmount_Click">Find</Button>
         <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource btnStyle}" Click="BtnAmountDrink_Click">Find</Button>
 
-        <ListView x:Name="listView" Grid.Row="3" Grid.ColumnSpan="3" ItemsSource="{Binding products}"
+        <ListView x:Name="listView" Grid.Row="3" Grid.ColumnSpan="3" ItemsSource="{Binding Products}"
                   Style="{StaticResource listViewStyle}" ItemContainerStyle="{StaticResource listViewItem}">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">

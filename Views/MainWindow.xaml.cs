@@ -8,40 +8,24 @@ namespace Store
 {
     public partial class MainWindow : Window
     {
-        private SqlConnection connection;
-        public ObservableCollection<Product> products { get; set; } = new();  // коллекция продуктов
+        public ObservableCollection<DAL.Entity.Product> Products { get; set; } = new();  // коллекция продуктов
 
         public MainWindow()
         {
             InitializeComponent();
-            connection = null!;
             DataContext = this;
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                connection = new SqlConnection(App.ConnectionString);
-                connection.Open();  // подключаемся к БД
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                Close();
-            }
             CreateTables();  // создаём таблицы
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            connection?.Close();
+            //
         }
 
 
         private void CreateTables()
         {
-            using SqlCommand command = new SqlCommand() { Connection = connection };
+            using SqlCommand command = new SqlCommand() { Connection = App.Connection };
             command.CommandText = @"CREATE TABLE Category (
                                         id int primary key identity(1, 1),
                                     	name nvarchar(30) NOT NULL
@@ -59,13 +43,13 @@ namespace Store
                 MessageBox.Show("Таблицы созданы!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 InsertDataInTables();  // заполняем таблицы данными
             }
-            catch (SqlException) { MessageBox.Show("Таблицы уже созданы!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information); }
+            catch (SqlException) { /*MessageBox.Show("Таблицы уже созданы!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);*/ }
             catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void InsertDataInTables()
         {
-            using SqlCommand command = new SqlCommand() { Connection = connection };
+            using SqlCommand command = new SqlCommand() { Connection = App.Connection };
             command.CommandText = @"INSERT INTO Category (name)
                                     VALUES ('Молочка'), ('Напитки'), ('Крупы')
 
@@ -86,10 +70,11 @@ namespace Store
 
         private void GetAllProducts()
         {
-            using SqlCommand command = new SqlCommand() { Connection = connection };
+            using SqlCommand command = new SqlCommand() { Connection =  App.Connection };
             command.CommandText = @"SELECT p.name, p.price, p.quantity, c.name AS 'category'
                                     FROM Product AS p
-                                    JOIN Category AS c ON c.id = p.id_category";  // запрос на все товары
+                                    JOIN Category AS c ON c.id = p.id_category
+                                    WHERE deleteDt IS NULL";  // запрос на все товары
             try
             {
                 UpdateCollectionProducts(command);  // обновляем коллекцию товаров
@@ -99,12 +84,12 @@ namespace Store
 
         private void GetDrinkProducts()
         {
-            using SqlCommand command = new SqlCommand() { Connection = connection };
+            using SqlCommand command = new SqlCommand() { Connection = App.Connection };
             command.CommandText = @"SELECT p.name, p.price, p.quantity, 'Drinkables' AS 'category'
                                     FROM Product AS p
-                                    WHERE id_category = (SELECT id
-                                                         FROM Category
-                                                         WHERE name LIKE 'Drinkables')";  // запрос на товары у которых категория - это 'Напитки'
+                                    WHERE deleteDt IS NULL AND id_category = (SELECT id
+                                                                              FROM Category
+                                                                              WHERE name LIKE 'Drinkables')";  // запрос на товары у которых категория - это 'Напитки'
             try
             {
                 UpdateCollectionProducts(command);  // обновляем коллекцию товаров
@@ -114,13 +99,13 @@ namespace Store
 
         private void UpdateCollectionProducts(SqlCommand command)
         {
-            products.Clear();
+            Products.Clear();
 
             using SqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
                 // заполняем данными из БД коллекцию продуктов
-                products.Add(new Product
+                Products.Add(new()
                 {
                     Name = reader.GetString("Name"),
                     Price = (float)reader.GetDouble("Price"),
@@ -133,8 +118,8 @@ namespace Store
 
         private void BtnAllAmount_Click(object sender, RoutedEventArgs e)
         {
-            using SqlCommand command = new SqlCommand() { Connection = connection };
-            command.CommandText = "SELECT COUNT(*) FROM Product";  // кол-во всех товаров
+            using SqlCommand command = new SqlCommand() { Connection = App.Connection };
+            command.CommandText = "SELECT COUNT(*) FROM Product WHERE deleteDt IS NULL";  // кол-во всех товаров
             try
             {
                 textAllCount.Text = command.ExecuteScalar().ToString();  // обновляем значение в интерфейсе
@@ -145,18 +130,24 @@ namespace Store
 
         private void BtnAmountDrink_Click(object sender, RoutedEventArgs e)
         {
-            using SqlCommand command = new SqlCommand() { Connection = connection };
+            using SqlCommand command = new SqlCommand() { Connection = App.Connection };
             command.CommandText = @"SELECT COUNT(*)
                                     FROM Product
-                                    WHERE id_category = (SELECT id
-					                                     FROM Category
-					                                     WHERE name LIKE 'Drinkables')";  // кол-во товаров, категория которых - это 'Напитки'
+                                    WHERE deleteDt IS NULL AND id_category = (SELECT id
+					                                                          FROM Category
+					                                                          WHERE name LIKE 'Drinkables')";  // кол-во товаров, категория которых - это 'Напитки'
             try
             {
                 textDrinkCount.Text = command.ExecuteScalar().ToString();  // обновляем значение в интерфейсе
                 GetDrinkProducts();  // обновляем список товаров
             }
             catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+        private void BtnExit_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Do you want to exit?", "Exit", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                Close();
         }
     }
 }
