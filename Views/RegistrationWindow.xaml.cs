@@ -3,67 +3,63 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.Data.SqlClient;
 
 namespace Store.Views
 {
     public partial class RegistrationWindow : Window
     {
-        public enum RegistrationCheck { MinUserName = 3, MinLogin = 8, MinPassword = 8, MinEmail = 12 };
         private Window logInWindow;
         private bool isClosingLogInWindow;
+        public DAL.Entity.User User { get; set; } = new() { Name = "Username", Login = "Login", Password = "Password", Email = "Email" };  // user который регистрируется
+        private DAL.DAO.UserDao userDao;
 
         public RegistrationWindow(Window logInWindow)
         {
             InitializeComponent();
+            DataContext = User;
             this.logInWindow = logInWindow;
             isClosingLogInWindow = true;
+            userDao = new DAL.DAO.UserDao(App.GetConnection());
         }
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (isClosingLogInWindow) logInWindow.Close();
+            if (isClosingLogInWindow) logInWindow.Close();  // если можно закрыть окно, то закрываем
         }
 
 
-        private void CheckData(object sender)
+        private void CheckCorrectData(object sender)
         {
             if (sender is TextBox textBox)
             {
+                // узнаём какое это поле
                 if (textBox.Tag.ToString() == "Username")
                 {
-                    if (userName.Text.Length < (int)RegistrationCheck.MinUserName) userName.BorderBrush = Brushes.Red;
-                    else userName.BorderBrush = Brushes.Gray;
+                    // если в поле строка по умолчанию или данные неверно введены, то красим периметр красным цветом
+                    if (User.Name != "Username" && !User.CheckUserName()) textBox.BorderBrush = Brushes.Red;
+                    else textBox.BorderBrush = Brushes.Gray;
                 }
                 else if (textBox.Tag.ToString() == "Login")
                 {
-                    if (login.Text.Length < (int)RegistrationCheck.MinLogin) login.BorderBrush = Brushes.Red;
-                    else login.BorderBrush = Brushes.Gray;
+                    if (User.Login != "Login" && !User.CheckLogin()) textBox.BorderBrush = Brushes.Red;
+                    else textBox.BorderBrush = Brushes.Gray;
                 }
                 else if (textBox.Tag.ToString() == "Password")
                 {
-                    if (textBoxShowPassword.Text.Length < (int)RegistrationCheck.MinPassword) textBoxShowPassword.BorderBrush = Brushes.Red;
-                    else textBoxShowPassword.BorderBrush = Brushes.Gray;
+                    if (User.Password != "Password" && !User.CheckPassword()) textBox.BorderBrush = Brushes.Red;
+                    else textBox.BorderBrush = Brushes.Gray;
                 }
                 else
                 {
-                    if (email.Text.Length < (int)RegistrationCheck.MinEmail) email.BorderBrush = Brushes.Red;
-                    else email.BorderBrush = Brushes.Gray;
+                    if (User.Email != "Email" && !User.CheckEmail()) textBox.BorderBrush = Brushes.Red;
+                    else textBox.BorderBrush = Brushes.Gray;
                 }
             }
-            else if (sender is PasswordBox)
+            else if (sender is PasswordBox passwordBox)  // если это поле для ввода пароля
             {
-                if (password.Password.Length < (int)RegistrationCheck.MinPassword) password.BorderBrush = Brushes.Red;
-                else password.BorderBrush = Brushes.Gray;
+                if (passwordBox.Password != "Password" && !User.CheckPassword()) passwordBox.BorderBrush = Brushes.Red;
+                else passwordBox.BorderBrush = Brushes.Gray;
             }
-        }
-
-        private bool CheckSendData()
-        {
-            return userName.Text.Length >= (int)RegistrationCheck.MinUserName &&
-                   login.Text.Length >= (int)RegistrationCheck.MinLogin &&
-                   password.Password.Length >= (int)RegistrationCheck.MinPassword &&
-                   email.Text.Length >= (int)RegistrationCheck.MinEmail;
         }
 
         private void ShowLogInWindow()
@@ -74,57 +70,30 @@ namespace Store.Views
         }
 
 
-        private void InsertUserInDB()
-        {
-            using SqlCommand command = new() { Connection = App.Connection };
-            command.CommandText = @"INSERT INTO [User](name, login, password, email)
-                                    VALUES (@Name, @Login, @Password, @Email)";
-            command.Parameters.AddWithValue("@Name", userName.Text);
-            command.Parameters.AddWithValue("@Login", login.Text);
-            command.Parameters.AddWithValue("@Password", password.Password);
-            command.Parameters.AddWithValue("@Email", email.Text);
-            try
-            {
-                command.ExecuteNonQuery();
-            }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-        }
-
         private bool CheckUniqueDataInDB()
         {
-            string str = "";
-            using SqlCommand command = new() { Connection = App.Connection };
-
-            command.CommandText = @"SELECT Count(*) FROM [User] WHERE login = @login";
-            command.Parameters.AddWithValue("@login", login.Text);
+            string notUniqueFields = "";
             try
             {
-                int count = (int)command.ExecuteScalar();
-                if (count == 1) str += "login, ";
+                if (!userDao.CheckUniqueByLogin(User.Login)) notUniqueFields += "login, ";
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+            catch (Exception) { MessageBox.Show("Something is wrong with the database. Try a little later.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-            command.CommandText = @"SELECT Count(*) FROM [User] WHERE password = @password";
-            command.Parameters.AddWithValue("@password", password.Password);
             try
             {
-                int count = (int)command.ExecuteScalar();
-                if (count == 1) str += "password, ";
+                if (!userDao.CheckUniqueByPassword(User.Password)) notUniqueFields += "password, ";
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+            catch (Exception) { MessageBox.Show("Something is wrong with the database. Try a little later.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-            command.CommandText = @"SELECT Count(*) FROM [User] WHERE email = @email";
-            command.Parameters.AddWithValue("@email", email.Text);
             try
             {
-                int count = (int)command.ExecuteScalar();
-                if (count == 1) str += "email, ";
+                if (!userDao.CheckUniqueByEmail(User.Email)) notUniqueFields += "email, ";
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+            catch (Exception) { MessageBox.Show("Something is wrong with the database. Try a little later.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-            if (!string.IsNullOrEmpty(str))
+            if (!String.IsNullOrEmpty(notUniqueFields))
             {
-                MessageBox.Show($"{str} already exists", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{notUniqueFields}already exists", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else return true;
@@ -133,54 +102,43 @@ namespace Store.Views
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
-            {
-                if (textBox.Text == textBox.Tag.ToString())
-                {
-                    textBox.Clear();
-                    textBox.Foreground = Brushes.Black;
-                }
-            }
-            else if (sender is PasswordBox passwordBox)
-            {
-                if (passwordBox.Password == passwordBox.Tag.ToString())
-                {
-                    passwordBox.Clear();
-                    passwordBox.Foreground = Brushes.Black;
-                }
-            }
+            GuiBaseManipulation.TextBoxGotFocus(sender);
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
-            {
-                if (String.IsNullOrEmpty(textBox.Text))
-                {
-                    textBox.Foreground = Brushes.Gray;
-                    textBox.Text = textBox.Tag.ToString();
-                    textBox.BorderBrush = Brushes.Gray;
-                }
-            }
-            else if (sender is PasswordBox passwordBox)
-            {
-                if (String.IsNullOrEmpty(passwordBox.Password))
-                {
-                    passwordBox.Foreground = Brushes.Gray;
-                    passwordBox.Password = passwordBox.Tag.ToString();
-                    passwordBox.BorderBrush = Brushes.Gray;
-                }
-            }
+            GuiBaseManipulation.TextBoxLostFocus(sender);
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBox_TextChanged(object sender, RoutedEventArgs e)
         {
-            CheckData(sender);
+            CheckCorrectData(sender);
+
+            if (password.Password != textBoxShowPassword.Text)
+                GuiBaseManipulation.SetPasswordBox(textBoxShowPassword, password);  // чтобы значения двух полей для пароля совпадали
+            if (passwordCheck.Password != textBoxShowPasswordCheck.Text)
+                GuiBaseManipulation.SetPasswordBox(textBoxShowPasswordCheck, passwordCheck);  // чтобы значения двух полей для доп.ввода пароля совпадали
+        }
+
+        private void ShowPassword_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Image image)
+            {
+                if (image.Tag.ToString()!.EndsWith("Check"))
+                    GuiBaseManipulation.TextBoxShowPassword(textBoxShowPasswordCheck);
+                else
+                    GuiBaseManipulation.TextBoxShowPassword(textBoxShowPassword);
+            }
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            CheckData(sender);
+            CheckCorrectData(sender);
+
+            if (password.Password != textBoxShowPassword.Text)
+                GuiBaseManipulation.SetTextBoxPassword(textBoxShowPassword, password);  // чтобы значения двух полей для пароля совпадали
+            if (passwordCheck.Password != textBoxShowPasswordCheck.Text)
+                GuiBaseManipulation.SetTextBoxPassword(textBoxShowPasswordCheck, passwordCheck);  // чтобы значения двух полей для доп.ввода пароля совпадали
         }
 
         private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -189,37 +147,31 @@ namespace Store.Views
             {
                 if (textBlock.Text == "Log In")
                 {
-                    ShowLogInWindow();
+                    ShowLogInWindow();  // переключаемся на окно для авторизации
                 }
-            }
-        }
-
-        private void ShowPasswordBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (textBoxShowPassword.Visibility == Visibility.Hidden)
-            {
-                textBoxShowPassword.Text = password.Password;
-                textBoxShowPassword.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                password.Password = textBoxShowPassword.Text;
-                textBoxShowPassword.Visibility = Visibility.Hidden;
             }
         }
 
         private void SignUpBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckSendData())
+            if (User.CheckAllData())  // данные корректны
             {
-                if (CheckUniqueDataInDB())
+                if (CheckUniqueDataInDB())  // данные уникальны
                 {
-                    InsertUserInDB();
-                    MessageBox.Show($"You have successfully sign up, {userName.Text}!", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                    ShowLogInWindow();
+                    if (User.CheckPasswordByString(passwordCheck.Password))  // пароль и пароль подтверждения совпадают
+                    {
+                        try
+                        {
+                            userDao.Add(User);  // запись user-а в БД
+                            MessageBox.Show($"You have successfully sign up, {User.Name}!", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                            ShowLogInWindow();  // переключаемся на окно для авторизации
+                        }
+                        catch (Exception) { MessageBox.Show("Something is wrong with the database. Try a little later.", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+                    }
+                    else MessageBox.Show("Passwords are different!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            else { MessageBox.Show("Not all fields are filled", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+            else MessageBox.Show("Not all fields are filled", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

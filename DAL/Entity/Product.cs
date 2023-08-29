@@ -1,4 +1,4 @@
-﻿namespace DAL.Entity
+﻿namespace Store.DAL.Entity
 {
     public class Product
     {

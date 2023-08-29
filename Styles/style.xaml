@@ -19,7 +19,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
+
     <Style x:Key="textBoxStyle" TargetType="TextBox">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -29,7 +29,7 @@
         <Setter Property="BorderBrush" Value="Gray"/>
         <Setter Property="MaxWidth" Value="500"/>
     </Style>
-    
+
     <Style x:Key="passwordBoxStyle" TargetType="PasswordBox">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -39,7 +39,7 @@
         <Setter Property="BorderBrush" Value="Gray"/>
         <Setter Property="MaxWidth" Value="500"/>
     </Style>
-    
+
     <Style x:Key="btnBaseStyle">
         <Setter Property="Button.Background" Value="Green"/>
         <Setter Property="Button.Foreground" Value="White"/>
@@ -56,7 +56,7 @@
     <Style x:Key="btnImageStyle">
         <Setter Property="Button.Background" Value="Transparent"/>
         <Setter Property="Button.BorderBrush" Value="Transparent"/>
-        <Setter Property="Button.Margin" Value="-2,12,3,12"/>
+        <Setter Property="Button.Margin" Value="-2,10,3,12"/>
     </Style>
     
 </ResourceDictionary>
