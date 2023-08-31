@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
@@ -35,7 +36,7 @@ namespace Store.DAL.DAO
         public List<Entity.Product> GetAllWithDeleted()
         {
             using SqlCommand command = new() { Connection = _connection };
-            command.CommandText = @"SELECT p.name, p.price, p.quantity, c.name AS 'category'
+            command.CommandText = @"SELECT p.name, p.price, p.quantity, c.name AS 'category', p.deleteDt
                                     FROM Product AS p
                                     JOIN Category AS c ON c.id = p.id_category";  // запрос на все товары
             try
@@ -49,18 +50,19 @@ namespace Store.DAL.DAO
                         Name = reader.GetString("Name"),
                         Price = (float)reader.GetDouble("Price"),
                         Quantity = reader.GetInt32("Quantity"),
-                        Category = reader.GetString("Category")
+                        Category = reader.GetString("Category"),
+                        DeleteDt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime("DeleteDt")
                     });
                 }
                 return products;
-            }
+        }
             catch { throw; }
         }
 
         public List<Entity.Product> GetAll()
         {
             using SqlCommand command = new() { Connection = _connection };
-            command.CommandText = @"SELECT p.name, p.price, p.quantity, c.name AS 'category'
+            command.CommandText = @"SELECT p.name, p.price, p.quantity, c.name AS 'category', p.deleteDt
                                     FROM Product AS p
                                     JOIN Category AS c ON c.id = p.id_category
                                     WHERE deleteDt IS NULL";  // запрос на все неудалённые товары
@@ -76,7 +78,8 @@ namespace Store.DAL.DAO
                         Name = reader.GetString("Name"),
                         Price = (float)reader.GetDouble("Price"),
                         Quantity = reader.GetInt32("Quantity"),
-                        Category = reader.GetString("Category")
+                        Category = reader.GetString("Category"),
+                        DeleteDt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime("DeleteDt")
                     });
                 }
                 return products;
@@ -87,7 +90,7 @@ namespace Store.DAL.DAO
         public List<Entity.Product> GetAllDrinkables()
         {
             using SqlCommand command = new() { Connection = _connection };
-            command.CommandText = @"SELECT p.name, p.price, p.quantity, 'Drinkables' AS 'category'
+            command.CommandText = @"SELECT p.name, p.price, p.quantity, 'Drinkables' AS 'category', p.deleteDt
                                     FROM Product AS p
                                     WHERE deleteDt IS NULL AND id_category = (SELECT id
                                                                               FROM Category
@@ -104,7 +107,8 @@ namespace Store.DAL.DAO
                         Name = reader.GetString("Name"),
                         Price = (float)reader.GetDouble("Price"),
                         Quantity = reader.GetInt32("Quantity"),
-                        Category = reader.GetString("Category")
+                        Category = reader.GetString("Category"),
+                        DeleteDt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime("DeleteDt")
                     });
                 }
                 return products;
@@ -115,7 +119,7 @@ namespace Store.DAL.DAO
         public List<Entity.Product> GetAllDrinkablesWithDeleted()
         {
             using SqlCommand command = new() { Connection = _connection };
-            command.CommandText = @"SELECT p.name, p.price, p.quantity, 'Drinkables' AS 'category'
+            command.CommandText = @"SELECT p.name, p.price, p.quantity, 'Drinkables' AS 'category', p.deleteDt
                                     FROM Product AS p
                                     WHERE id_category = (SELECT id
                                                          FROM Category
@@ -132,7 +136,8 @@ namespace Store.DAL.DAO
                         Name = reader.GetString("Name"),
                         Price = (float)reader.GetDouble("Price"),
                         Quantity = reader.GetInt32("Quantity"),
-                        Category = reader.GetString("Category")
+                        Category = reader.GetString("Category"),
+                        DeleteDt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime("DeleteDt")
                     });
                 }
                 return products;

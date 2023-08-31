@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Store"
         mc:Ignorable="d"
         Closing="Window_Closing" MinWidth="400" MinHeight="275"
@@ -41,11 +42,14 @@
             <Setter Property="Margin" Value="1,4,1,1"/>
         </Style>
         <Style x:Key="listViewItem" TargetType="{x:Type ListViewItem}">
-            <Setter Property="Background" Value="CadetBlue"/>
+            <Setter Property="Background" Value="Red"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="SlateGray"/>
                 </Trigger>
+                <DataTrigger Binding="{Binding DeleteDt}" Value="{x:Null}">
+                    <Setter Property="Background" Value="CadetBlue" />
+                </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style x:Name="headerListView" TargetType="{x:Type GridViewColumnHeader}">

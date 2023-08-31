@@ -4,18 +4,20 @@ using System.Collections.Generic;
 
 namespace Store.DAL.Collection
 {
-    public class CollectionDrink : BaseCollectionProduct
+    // показ напитков
+    public class CollectionDrink : ICollectionProduct
     {
         private static CollectionDrink? collectionDrink = null;
         private DAO.ProductDao productDao;
-        List<Product> products = new List<Product>();
+        List<Product> products;
 
         private CollectionDrink(SqlConnection connection)
         {
-            productDao = new DAO.ProductDao(connection);
+            products = new List<Product>();
+            productDao = new DAO.ProductDao(connection);  // для доступа к работе с БД
         }
 
-        public static BaseCollectionProduct GetInstance(SqlConnection? connection = null)
+        public static ICollectionProduct GetInstance(SqlConnection? connection = null)  // Паттерн Одиночка
         {
             if (collectionDrink is null && connection is not null)
             {
@@ -24,19 +26,19 @@ namespace Store.DAL.Collection
             return collectionDrink!;
         }
 
-        public override List<Product> GetAll()
+        public List<Product> GetAll()
         {
-            products = productDao.GetAllDrinkables();
+            products = productDao.GetAllDrinkables();  // получение всех товаров напитков
             return products;
         }
 
-        public override List<Product> GetAllWithDeleted()
+        public List<Product> GetAllWithDeleted()
         {
-            products = productDao.GetAllDrinkablesWithDeleted();
+            products = productDao.GetAllDrinkablesWithDeleted();  // получение всех товаров напитков + те которые удалены
             return products;
         }
 
-        public override int Count()
+        public int Count()
         {
             return products.Count;
         }

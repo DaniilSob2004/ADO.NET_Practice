@@ -4,18 +4,20 @@ using System.Collections.Generic;
 
 namespace Store.DAL.Collection
 {
-    public class CollectionAll : BaseCollectionProduct
+    // показ всех товаров
+    public class CollectionAll : ICollectionProduct
     {
         private static CollectionAll? collectionAll = null;
         private DAO.ProductDao productDao;
-        List<Product> products = new List<Product>();
+        List<Product> products;
 
         private CollectionAll(SqlConnection connection)
         {
-            productDao = new DAO.ProductDao(connection);
+            products = new List<Product>();
+            productDao = new DAO.ProductDao(connection);  // для доступа к работе с БД
         }
 
-        public static BaseCollectionProduct GetInstance(SqlConnection? connection = null)
+        public static ICollectionProduct GetInstance(SqlConnection? connection = null)  // Паттерн Одиночка
         {
             if (collectionAll is null && connection is not null)
             {
@@ -24,19 +26,19 @@ namespace Store.DAL.Collection
             return collectionAll!;
         }
 
-        public override List<Product> GetAll()
+        public List<Product> GetAll()
         {
-            products = productDao.GetAll();
+            products = productDao.GetAll();  // получение всех товаров
             return products;
         }
 
-        public override List<Product> GetAllWithDeleted()
+        public List<Product> GetAllWithDeleted()
         {
-            products = productDao.GetAllWithDeleted();
+            products = productDao.GetAllWithDeleted();  // получение всех товаров + те которые удалены
             return products;
         }
 
-        public override int Count()
+        public int Count()
         {
             return products.Count;
         }
