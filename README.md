@@ -1,5 +1,6 @@
  - Fourth and fifth home work:
 
+![HW5_1](https://github.com/DaniilSob2004/ADO.NET_Practice/assets/106149184/e819eee4-f603-44dd-9000-4fb7bf1de89c)
 ![HW5](https://github.com/DaniilSob2004/ADO.NET_Practice/assets/106149184/75b08dae-7465-47d8-b479-2e374f7fcffe)
 
  - Third home work:
